@@ -2,6 +2,8 @@
 
 namespace Madkom\EventStore\Client\Domain\Socket\Message;
 
+use Google\Protobuf\Internal\Message;
+
 /**
  * Class SocketMessage - Represents decoded message from socket stream
  *
@@ -17,7 +19,7 @@ class SocketMessage
 	/** @var  string */
 	private $correlationID;
 
-	/** @var  \ProtobufMessage */
+	/** @var  Message */
 	private $data;
 
 	/** @var Credentials  */
@@ -26,12 +28,12 @@ class SocketMessage
 	/**
 	 * @param MessageType $messageType
 	 * @param string      $correlationID
-	 * @param \ProtobufMessage $data
+	 * @param Message $data
 	 * @param Credentials $credentials
 	 *
 	 * @internal param string $flag
 	 */
-	public function __construct(MessageType $messageType, $correlationID, \ProtobufMessage $data = null, Credentials $credentials = null)
+	public function __construct(MessageType $messageType, $correlationID, Message $data = null, Credentials $credentials = null)
 	{
 		$this->messageType 	= $messageType;
 		$this->correlationID = $correlationID;
@@ -70,7 +72,7 @@ class SocketMessage
 	{
 		return $this->messageType;
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -80,7 +82,7 @@ class SocketMessage
 	}
 
 	/**
-	 * @return \ProtobufMessage
+	 * @return Message
 	 */
 	public function getData()
 	{

@@ -42,7 +42,7 @@ $resolvedConnection->then(function (React\Stream\Stream $stream) {
     $eventStreamId = 'someteststream';
 
 //    Add new event to stream
-    $event = new \Madkom\EventStore\Client\Domain\Socket\Data\NewEvent();
+    $event = new \EventStore\Client\Messages\NewEvent();
     $event->setData(json_encode(['test' => 'bla']));
     $event->setEventType('testType');
 //    UUID must have 32bits
@@ -50,7 +50,7 @@ $resolvedConnection->then(function (React\Stream\Stream $stream) {
     $event->setDataContentType(1);
     $event->setMetadataContentType(2);
 
-    $writeEvents = new \Madkom\EventStore\Client\Domain\Socket\Data\WriteEvents();
+    $writeEvents = new \EventStore\Client\Messages\WriteEvents();
     $writeEvents->setEventStreamId($eventStreamId);
     $writeEvents->setExpectedVersion(-2);
 //    If you don't have master-slave nodes
@@ -64,7 +64,7 @@ $resolvedConnection->then(function (React\Stream\Stream $stream) {
             $writeEvents)
     );
 
-    $readStreamEvent = new \Madkom\EventStore\Client\Domain\Socket\Data\ReadStreamEvents();
+    $readStreamEvent = new \Madkom\EventStore\Client\Domain\Socket\oldData\ReadStreamEvents();
     $readStreamEvent->setEventStreamId($eventStreamId);
     $readStreamEvent->setResolveLinkTos(false);
     $readStreamEvent->setRequireMaster(false);

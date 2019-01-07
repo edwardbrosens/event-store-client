@@ -1,10 +1,11 @@
 <?php
 
+use EventStore\Client\Messages\ConnectToPersistentSubscription;
+use EventStore\Client\Messages\NotHandled;
+use EventStore\Client\Messages\PersistentSubscriptionAckEvents;
+use EventStore\Client\Messages\PersistentSubscriptionConfirmation;
+use EventStore\Client\Messages\PersistentSubscriptionStreamEventAppeared;
 use Madkom\EventStore\Client\Application\Api\EventStore;
-use Madkom\EventStore\Client\Domain\Socket\Data\ConnectToPersistentSubscription;
-use Madkom\EventStore\Client\Domain\Socket\Data\PersistentSubscriptionAckEvents;
-use Madkom\EventStore\Client\Domain\Socket\Data\PersistentSubscriptionConfirmation;
-use Madkom\EventStore\Client\Domain\Socket\Data\PersistentSubscriptionStreamEventAppeared;
 use Madkom\EventStore\Client\Domain\Socket\Message\Credentials;
 use Madkom\EventStore\Client\Domain\Socket\Message\MessageType;
 use Madkom\EventStore\Client\Domain\Socket\Message\SocketMessage;
@@ -14,19 +15,11 @@ use Madkom\EventStore\Client\Infrastructure\ReactStream;
 require_once(__DIR__ .  '/../vendor/autoload.php');
 
 $loop = React\EventLoop\Factory::create();
+$connector = new \React\Socket\Connector($loop);
+$connector->connect('tcp://localhost:1113')
+    ->then(function (\React\Socket\ConnectionInterface $connection) use ($loop) {
 
-$dnsResolverFactory = new React\Dns\Resolver\Factory();
-$dns = $dnsResolverFactory->createCached(null, $loop);
-
-$connector = new React\SocketClient\Connector($loop, $dns);
-
-$resolvedConnection = $connector->create(gethostbyname('es'), 1113);
-$resolvedConnection->then(
-    function (React\Stream\Stream $stream) use ($loop) {
-        $eventStore = new EventStore(
-            new ReactStream($stream),
-            new InMemoryLogger()
-        );
+        $eventStore = new EventStore(new ReactStream($connection), new InMemoryLogger());
 
         $subscriptionId = '';
 
@@ -35,8 +28,8 @@ $resolvedConnection->then(
          * broken.
          */
         $connectToPersistentSubscription = new ConnectToPersistentSubscription();
-        $connectToPersistentSubscription->setSubscriptionId('Foo');
-        $connectToPersistentSubscription->setEventStreamId('TestStream');
+        $connectToPersistentSubscription->setSubscriptionId('ctd');
+        $connectToPersistentSubscription->setEventStreamId('6c9506b5-f5c7-452c-965e-31a0a77f9268');
         $connectToPersistentSubscription->setAllowedInFlightMessages(1);
 
         $eventStore->sendMessage(new SocketMessage(
@@ -45,6 +38,24 @@ $resolvedConnection->then(
             $connectToPersistentSubscription,
             new Credentials('admin', 'changeit')
         ));
+
+//        $eventStore->addAction(MessageType::HEARTBEAT_REQUEST, function (SocketMessage $socketMessage) use($eventStore) {
+//            echo "Heartbeat request don't forget to send heartbeat response";
+//            $heartbeatRepsonseMessage = new SocketMessage(new MessageType(MessageType::HEARTBEAT_RESPONSE), $socketMessage->getCorrelationID(), null, new Credentials('admin', 'changeit'));
+//            $eventStore->sendMessage($heartbeatRepsonseMessage);
+//        });
+
+        $eventStore->addAction(MessageType::NOT_HANDLED, function (SocketMessage $socketMessage) use($eventStore) {
+            echo "Heartbeat request don't forget to send heartbeat response";
+
+            $notHandled = new NotHandled();
+            $notHandled->mergeFromString($socketMessage->getData());
+            $reason = $notHandled->getReason();
+
+
+            $heartbeatRepsonseMessage = new SocketMessage(new MessageType(MessageType::HEARTBEAT_RESPONSE), $socketMessage->getCorrelationID(), null, new Credentials('admin', 'changeit'));
+            $eventStore->sendMessage($heartbeatRepsonseMessage);
+        });
 
         $eventStore->addAction(MessageType::PERSISTENT_SUBSCRIPTION_CONFIRMATION, function(SocketMessage $socketMessage) use (&$subscriptionId) {
             /** @var PersistentSubscriptionConfirmation $socketMessageData */
@@ -58,6 +69,7 @@ $resolvedConnection->then(
             $loop->stop();
         });
 
+
         $eventStore->addAction(MessageType::PERSISTENT_SUBSCRIPTION_STREAM_EVENT_APPEARED, function(SocketMessage $socketMessage) use ($eventStore, &$subscriptionId) {
             echo "Event appeared, don't forget to ack!\n";
 
@@ -69,7 +81,7 @@ $resolvedConnection->then(
              */
             $ack = new PersistentSubscriptionAckEvents();
             $ack->setSubscriptionId($subscriptionId);
-            $ack->appendProcessedEventIds($socketMessageData->getEvent()->getEvent()->getEventId());
+            $ack->setProcessedEventIds([$socketMessageData->getEvent()->getEvent()->getEventId()]);
             $eventStore->sendMessage(new SocketMessage(
                 new MessageType(MessageType::PERSISTENT_SUBSCRIPTION_ACK_EVENTS),
                 $socketMessage->getCorrelationID(),

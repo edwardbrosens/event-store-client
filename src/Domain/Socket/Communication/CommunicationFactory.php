@@ -2,7 +2,7 @@
 
 namespace Madkom\EventStore\Client\Domain\Socket\Communication;
 
-use Madkom\EventStore\Client\Domain\Socket\Data\UnsubscribeFromStream;
+use EventStore\Client\Messages\UnsubscribeFromStream;
 use Madkom\EventStore\Client\Domain\Socket\Message\MessageType;
 use Madkom\EventStore\Client\Domain\Socket\Communication\Type;
 

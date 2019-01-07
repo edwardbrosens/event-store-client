@@ -2,10 +2,10 @@
 
 namespace Madkom\EventStore\Client\Domain\Socket\Communication\Type;
 
+use EventStore\Client\Messages\SubscriptionDropped;
 use Madkom\EventStore\Client\Domain\Socket\Communication\Communicable;
 use Madkom\EventStore\Client\Domain\Socket\Message\MessageType;
 use Madkom\EventStore\Client\Domain\Socket\Message\SocketMessage;
-use Madkom\EventStore\Client\Domain\Socket\Data;
 
 /**
  * Class SubscriptionDroppedHandler
@@ -21,9 +21,8 @@ class SubscriptionDroppedHandler implements Communicable
      */
     public function handle(MessageType $messageType, $correlationID, $data)
     {
-        $dataObject = new Data\SubscriptionDropped();
-        $dataObject->parseFromString($data);
-        $dataObject->dump();
+        $dataObject = new SubscriptionDropped();
+        $dataObject->mergeFromString($data);
 
         return new SocketMessage($messageType, $correlationID, $dataObject);
     }

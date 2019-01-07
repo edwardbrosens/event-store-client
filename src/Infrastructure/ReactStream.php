@@ -4,7 +4,7 @@ namespace Madkom\EventStore\Client\Infrastructure;
 
 use Madkom\EventStore\Client\Domain\Socket\Message\SocketMessage;
 use Madkom\EventStore\Client\Domain\Socket\Stream;
-use React\Stream\Stream as ReactStreamApi;
+use React\Stream\DuplexStreamInterface as ReactStreamApi;
 
 /**
  * Class ReactStream

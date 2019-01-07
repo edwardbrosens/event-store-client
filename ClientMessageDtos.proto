@@ -1,4 +1,6 @@
-package EventStore.Client.Domain.Socket.Data;
+syntax = "proto3";
+
+package EventStore.Client.Messages;
 
 enum OperationResult
 {
@@ -13,113 +15,114 @@ enum OperationResult
 }
 
 message NewEvent {
-	required bytes event_id = 1;
-	required string event_type = 2;
-	required int32 data_content_type = 3;
-	required int32 metadata_content_type = 4;
-	required bytes data = 5;
-	optional bytes metadata = 6;
+	bytes event_id = 1;
+	string event_type = 2;
+	int32 data_content_type = 3;
+	int32 metadata_content_type = 4;
+	bytes data = 5;
+	bytes metadata = 6;
 }
 
 message EventRecord {
-	required string event_stream_id = 1;
-	required int32 event_number = 2;
-	required bytes event_id = 3;
-	required string event_type = 4;
-	required int32 data_content_type = 5;
-	required int32 metadata_content_type = 6;
-	required bytes data = 7;
-	optional bytes metadata = 8;
-	optional int64 created = 9;
-	optional int64 created_epoch = 10;
+	string event_stream_id = 1;
+	int64 event_number = 2;
+	bytes event_id = 3;
+	string event_type = 4;
+	int32 data_content_type = 5;
+	int32 metadata_content_type = 6;
+	bytes data = 7;
+	bytes metadata = 8;
+	int64 created = 9;
+	int64 created_epoch = 10;
 }
 
 message ResolvedIndexedEvent {
-	required EventRecord event = 1;
-	optional EventRecord link = 2;
+	EventRecord event = 1;
+	EventRecord link = 2;
 }
 
 message ResolvedEvent {
-	required EventRecord event = 1;
-	optional EventRecord link = 2;
-	required int64 commit_position = 3;
-	required int64 prepare_position = 4;
+	EventRecord event = 1;
+	EventRecord link = 2;
+	int64 commit_position = 3;
+	int64 prepare_position = 4;
 }
 
 message WriteEvents {
-	required string event_stream_id = 1;
-	required int32 expected_version = 2;
+	string event_stream_id = 1;
+	int64 expected_version = 2;
 	repeated NewEvent events = 3;
-	required bool require_master = 4;
+	bool require_master = 4;
 }
 
 message WriteEventsCompleted {
-	required OperationResult result = 1;
-	optional string message = 2;
-	required int32 first_event_number = 3;
-	required int32 last_event_number = 4;
-	optional int64 prepare_position = 5;
-	optional int64 commit_position = 6;
+	OperationResult result = 1;
+	string message = 2;
+	int64 first_event_number = 3;
+	int64 last_event_number = 4;
+	int64 prepare_position = 5;
+	int64 commit_position = 6;
+	int64 current_version  = 7;
 }
 
 message DeleteStream {
-	required string event_stream_id = 1;
-	required int32 expected_version = 2;
-	required bool require_master = 3;
-	optional bool hard_delete = 4;
+	string event_stream_id = 1;
+	int64 expected_version = 2;
+	bool require_master = 3;
+	bool hard_delete = 4;
 }
 
 message DeleteStreamCompleted {
-	required OperationResult result = 1;
-	optional string message = 2;
-	optional int64 prepare_position = 3;
-	optional int64 commit_position = 4;
+	OperationResult result = 1;
+	string message = 2;
+	int64 prepare_position = 3;
+	int64 commit_position = 4;
 }
 
 message TransactionStart {
-	required string event_stream_id = 1;
-	required int32 expected_version = 2;
-	required bool require_master = 3;
+	string event_stream_id = 1;
+	int64 expected_version = 2;
+	bool require_master = 3;
 }
 
 message TransactionStartCompleted {
-	required int64 transaction_id = 1;
-	required OperationResult result = 2;
-	optional string message = 3;
+	int64 transaction_id = 1;
+	OperationResult result = 2;
+	string message = 3;
 }
 
 message TransactionWrite {
-	required int64 transaction_id = 1;
+	int64 transaction_id = 1;
 	repeated NewEvent events = 2;
-	required bool require_master = 3;
+	bool require_master = 3;
 }
 
 message TransactionWriteCompleted {
-	required int64 transaction_id = 1;
-	required OperationResult result = 2;
-	optional string message = 3;
+	int64 transaction_id = 1;
+	OperationResult result = 2;
+	string message = 3;
 }
 
 message TransactionCommit {
-	required int64 transaction_id = 1;
-	required bool require_master = 2;
+	int64 transaction_id = 1;
+	bool require_master = 2;
 }
 
 message TransactionCommitCompleted {
-	required int64 transaction_id = 1;
-	required OperationResult result = 2;
-	optional string message = 3;
-	required int32 first_event_number = 4;
-	required int32 last_event_number = 5;
-	optional int64 prepare_position = 6;
-	optional int64 commit_position = 7;
+	int64 transaction_id = 1;
+	OperationResult result = 2;
+	string message = 3;
+	int64 first_event_number = 4;
+	int64 last_event_number = 5;
+	int64 prepare_position = 6;
+	int64 commit_position = 7;
 }
 
 message ReadEvent {
-	required string event_stream_id = 1;
-	required int32 event_number = 2;
-	required bool resolve_link_tos = 3;
-	required bool require_master = 4;
+	string event_stream_id = 1;
+	int64 event_number = 2;
+	bool resolve_link_tos = 3;
+	bool require_master = 4;
 }
 
 message ReadEventCompleted {
@@ -133,18 +136,18 @@ message ReadEventCompleted {
 		AccessDenied = 5;
 	}
 
-	required ReadEventResult result = 1;
-	required ResolvedIndexedEvent event = 2;
+	ReadEventResult result = 1;
+	ResolvedIndexedEvent event = 2;
 
-	optional string error = 3;
+	string error = 3;
 }
 
 message ReadStreamEvents {
-	required string event_stream_id = 1;
-	required int32 from_event_number = 2;
-	required int32 max_count = 3;
-	required bool resolve_link_tos = 4;
-	required bool require_master = 5;
+	string event_stream_id = 1;
+	int64 from_event_number = 2;
+	int32 max_count = 3;
+	bool resolve_link_tos = 4;
+	bool require_master = 5;
 }
 
 message ReadStreamEventsCompleted {
@@ -159,21 +162,21 @@ message ReadStreamEventsCompleted {
 	}
 
 	repeated ResolvedIndexedEvent events = 1;
-	required ReadStreamResult result = 2;
-	required int32 next_event_number = 3;
-	required int32 last_event_number = 4;
-	required bool is_end_of_stream = 5;
-	required int64 last_commit_position = 6;
+	ReadStreamResult result = 2;
+	int64 next_event_number = 3;
+	int64 last_event_number = 4;
+	bool is_end_of_stream = 5;
+	int64 last_commit_position = 6;
 
-	optional string error = 7;
+	string error = 7;
 }
 
 message ReadAllEvents {
-	required int64 commit_position = 1;
-	required int64 prepare_position = 2;
-	required int32 max_count = 3;
-	required bool resolve_link_tos = 4;
-	required bool require_master = 5;
+	int64 commit_position = 1;
+	int64 prepare_position = 2;
+	int32 max_count = 3;
+	bool resolve_link_tos = 4;
+	bool require_master = 5;
 }
 
 message ReadAllEventsCompleted {
@@ -185,28 +188,141 @@ message ReadAllEventsCompleted {
 		AccessDenied = 3;
 	}
 
-	required int64 commit_position = 1;
-	required int64 prepare_position = 2;
+	int64 commit_position = 1;
+	int64 prepare_position = 2;
 	repeated ResolvedEvent events = 3;
-	required int64 next_commit_position = 4;
-	required int64 next_prepare_position = 5;
+	int64 next_commit_position = 4;
+	int64 next_prepare_position = 5;
 
-	optional ReadAllResult result = 6 [default = Success];
-	optional string error = 7;
+	ReadAllResult result = 6;
+	string error = 7;
+}
+
+message CreatePersistentSubscription {
+	string subscription_group_name = 1;
+	string event_stream_id = 2;
+	bool resolve_link_tos = 3;
+	int64 start_from = 4;
+	int32 message_timeout_milliseconds = 5;
+	bool record_statistics = 6;
+	int32 live_buffer_size = 7;
+	int32 read_batch_size = 8;
+	int32 buffer_size = 9;
+	int32 max_retry_count = 10;
+	bool prefer_round_robin = 11;
+	int32 checkpoint_after_time = 12;
+	int32 checkpoint_max_count = 13;
+	int32 checkpoint_min_count = 14;
+	int32 subscriber_max_count = 15;
+	string named_consumer_strategy = 16;
+}
+
+message DeletePersistentSubscription {
+	string subscription_group_name = 1;
+	string event_stream_id = 2;
+}
+
+message UpdatePersistentSubscription {
+	string subscription_group_name = 1;
+	string event_stream_id = 2;
+	bool resolve_link_tos = 3;
+	int64 start_from = 4;
+	int32 message_timeout_milliseconds = 5;
+	bool record_statistics = 6;
+	int32 live_buffer_size = 7;
+	int32 read_batch_size = 8;
+	int32 buffer_size = 9;
+	int32 max_retry_count = 10;
+	bool prefer_round_robin = 11;
+	int32 checkpoint_after_time = 12;
+	int32 checkpoint_max_count = 13;
+	int32 checkpoint_min_count = 14;
+	int32 subscriber_max_count = 15;
+	string named_consumer_strategy = 16;
+}
+
+message UpdatePersistentSubscriptionCompleted {
+	enum UpdatePersistentSubscriptionResult {
+		Success = 0;
+		DoesNotExist = 1;
+		Fail = 2;
+		AccessDenied=3;
+	}
+	UpdatePersistentSubscriptionResult result = 1;
+	string reason = 2;
+}
+
+message CreatePersistentSubscriptionCompleted {
+	enum CreatePersistentSubscriptionResult {
+		Success = 0;
+		AlreadyExists = 1;
+		Fail = 2;
+		AccessDenied=3;
+	}
+	CreatePersistentSubscriptionResult result = 1;
+	string reason = 2;
+}
+
+message DeletePersistentSubscriptionCompleted {
+	enum DeletePersistentSubscriptionResult {
+		Success = 0;
+		DoesNotExist = 1;
+		Fail = 2;
+		AccessDenied = 3;
+	}
+	DeletePersistentSubscriptionResult result = 1;
+	string reason = 2;
+}
+
+message ConnectToPersistentSubscription {
+	string subscription_id = 1;
+	string event_stream_id = 2;
+	int32 allowed_in_flight_messages = 3;
+
+}
+
+message PersistentSubscriptionAckEvents {
+	string subscription_id = 1;
+	repeated bytes processed_event_ids = 2;
+}
+
+message PersistentSubscriptionNakEvents {
+	enum NakAction {
+		Unknown = 0;
+		Park = 1;
+		Retry = 2;
+		Skip = 3;
+		Stop = 4;
+	}
+
+	string subscription_id = 1;
+	repeated bytes processed_event_ids = 2;
+	string message = 3;
+	NakAction action = 4;
+}
+
+message PersistentSubscriptionConfirmation {
+	int64 last_commit_position = 1;
+	string subscription_id = 2;
+	int64 last_event_number = 3;
+}
+
+message PersistentSubscriptionStreamEventAppeared {
+	ResolvedIndexedEvent event = 1;
 }
 
 message SubscribeToStream {
-	required string event_stream_id = 1;
-	required bool resolve_link_tos = 2;
+	string event_stream_id = 1;
+	bool resolve_link_tos = 2;
 }
 
 message SubscriptionConfirmation {
-	required int64 last_commit_position = 1;
-	optional int32 last_event_number = 2;
+	int64 last_commit_position = 1;
+	int64 last_event_number = 2;
 }
 
 message StreamEventAppeared {
-	required ResolvedEvent event = 1;
+	ResolvedEvent event = 1;
 }
 
 message UnsubscribeFromStream {
@@ -217,29 +333,32 @@ message SubscriptionDropped {
 	enum SubscriptionDropReason {
 		Unsubscribed = 0;
 		AccessDenied = 1;
+		NotFound=2;
+		PersistentSubscriptionDeleted=3;
+		SubscriberMaxCountReached=4;
 	}
-	
-	optional SubscriptionDropReason reason = 1 [default = Unsubscribed];
+
+	SubscriptionDropReason reason = 1;
 }
 
 message NotHandled {
-	
+
 	enum NotHandledReason {
 		NotReady = 0;
 		TooBusy = 1;
 		NotMaster = 2;
 	}
-	
-	required NotHandledReason reason = 1;
-	optional bytes additional_info = 2;
+
+	NotHandledReason reason = 1;
+	bytes additional_info = 2;
 
 	message MasterInfo {
-		required string external_tcp_address = 1;
-		required int32 external_tcp_port = 2;
-		required string external_http_address = 3;
-		required int32 external_http_port = 4;
-		optional string external_secure_tcp_address = 5;
-		optional int32 external_secure_tcp_port = 6;
+		string external_tcp_address = 1;
+		int32 external_tcp_port = 2;
+		string external_http_address = 3;
+		int32 external_http_port = 4;
+		string external_secure_tcp_address = 5;
+		int32 external_secure_tcp_port = 6;
 	}
 }
 
@@ -247,15 +366,15 @@ message ScavengeDatabase {
 }
 
 message ScavengeDatabaseCompleted {
-	
+
 	enum ScavengeResult {
 		Success = 0;
 		InProgress = 1;
 		Failed = 2;
 	}
-	
-	required ScavengeResult result = 1;
-	optional string error = 2;
-	required int32 total_time_ms = 3;
-	required int64 total_space_saved = 4;
+
+	ScavengeResult result = 1;
+	string error = 2;
+	int32 total_time_ms = 3;
+	int64 total_space_saved = 4;
 }

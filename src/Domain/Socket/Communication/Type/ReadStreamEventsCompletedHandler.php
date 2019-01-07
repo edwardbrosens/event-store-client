@@ -3,10 +3,10 @@
 namespace Madkom\EventStore\Client\Domain\Socket\Communication\Type;
 
 
+use EventStore\Client\Messages\ReadStreamEventsCompleted;
 use Madkom\EventStore\Client\Domain\Socket\Communication\Communicable;
 use Madkom\EventStore\Client\Domain\Socket\Message\MessageType;
 use Madkom\EventStore\Client\Domain\Socket\Message\SocketMessage;
-use Madkom\EventStore\Client\Domain\Socket\Data;
 
 /**
  * Class ReadStreamEventsForwardCompleted
@@ -21,9 +21,8 @@ class ReadStreamEventsCompletedHandler implements Communicable
      */
     public function handle(MessageType $messageType, $correlationID, $data)
     {
-        $dataObject = new Data\ReadStreamEventsCompleted();
-        $dataObject->parseFromString($data);
-        $dataObject->dump();
+        $dataObject = new ReadStreamEventsCompleted();
+        $dataObject->mergeFromString($data);
 
         return new SocketMessage($messageType, $correlationID, $dataObject);
     }
